@@ -15,12 +15,54 @@ function createVertexShader (gl: WebGLRenderingContext): WebGLShader {
   const shader = gl.createShader (gl.VERTEX_SHADER)!;
   gl.shaderSource (shader, `
     attribute vec3 coordinates;
+    uniform mat4 mMatrix;
     void main (void) {
-      gl_Position = vec4(coordinates, 1);
+      gl_Position = mMatrix * vec4(coordinates, 1);
     }
   `);
   gl.compileShader (shader);
   return shader;
+}
+
+function rotateX (matrix: Float32Array, angle: number): void {
+  const cos = Math.cos (angle);
+  const sin = Math.sin (angle);
+  const mv1 = matrix[1], mv5 = matrix[5], mv9 = matrix[9];
+
+  matrix[1] = matrix[1] * cos - matrix[2] * sin;
+  matrix[5] = matrix[5] * cos - matrix[6] * sin;
+  matrix[9] = matrix[9] * cos - matrix[10] * sin;
+
+  matrix[2] = matrix[2] * cos + mv1 * sin;
+  matrix[6] = matrix[6] * cos + mv5 * sin;
+  matrix[10] = matrix[10] * cos + mv9 * sin;
+}
+
+function rotateY (matrix: Float32Array, angle: number) {
+  const cos = Math.cos (angle);
+  const sin = Math.sin (angle);
+  const mv0 = matrix[0], mv4 = matrix[4], mv8 = matrix[8];
+
+  matrix[0] = cos * matrix[0] + sin * matrix[2];
+  matrix[4] = cos * matrix[4] + sin * matrix[6];
+  matrix[8] = cos * matrix[8] + sin * matrix[10];
+
+  matrix[2] = cos * matrix[2] - sin * mv0;
+  matrix[6] = cos * matrix[6] - sin * mv4;
+  matrix[10] = cos * matrix[10] - sin * mv8;
+}
+
+function rotateZ (matrix: Float32Array, angle: number): void {
+  const cos = Math.cos (angle);
+  const sin = Math.sin (angle);
+  const mv0 = matrix[0], mv4 = matrix[4], mv8 = matrix[8];
+
+  matrix[0] = cos * matrix[0] - sin * matrix[1];
+  matrix[4] = cos * matrix[4] - sin * matrix[5];
+  matrix[8] = cos * matrix[8] - sin * matrix[9];
+  matrix[1] = cos * matrix[1] + sin * mv0;
+  matrix[5] = cos * matrix[5] + sin * mv4;
+  matrix[9] = cos * matrix[9] + sin * mv8;
 }
 
 function init () {
@@ -72,19 +114,43 @@ function init () {
   gl.linkProgram (program);
   gl.useProgram (program);
 
-  gl.bindBuffer (gl.ARRAY_BUFFER, verticesBuffer);
-  gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
   const coordinates = gl.getAttribLocation (program, 'coordinates');
-  gl.vertexAttribPointer (coordinates, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray (coordinates);
+  const mMatrixLoc = gl.getUniformLocation (program, 'mMatrix');
+  const moveMatrix = new Float32Array ([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+  ]);
 
-  gl.clearColor (0, 0, 0, 1);
-  gl.enable (gl.DEPTH_TEST);
-  gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.viewport (0, 0, canvas.width, canvas.height);
-  gl.drawElements (gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
-  gl.finish ();
-  gl.flush ();
+  const draw = function (): void {
+    gl.bindBuffer (gl.ARRAY_BUFFER, verticesBuffer);
+    gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    gl.vertexAttribPointer (coordinates, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray (coordinates);
+
+    gl.clearColor (0, 0, 0, 1);
+    gl.enable (gl.DEPTH_TEST);
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport (0, 0, canvas.width, canvas.height);
+    gl.uniformMatrix4fv (mMatrixLoc, false, moveMatrix);
+    gl.drawElements (gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+    gl.finish ();
+    gl.flush ();
+    window.requestAnimationFrame (draw);
+  };
+
+  const rotate = function (e: MouseEvent): void {
+    if (e.buttons & 1) {
+      rotateX (moveMatrix, e.movementY * Math.PI / 100);
+      rotateY (moveMatrix, e.movementX * Math.PI / 100);
+    }
+  };
+  document.addEventListener ('mousemove', rotate, {
+    once: false,
+    passive: true
+  });
+  draw ();
 }
 
 if (document.readyState === 'loading') {
