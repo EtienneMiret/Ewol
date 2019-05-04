@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "strict": true,
+    "target": "es6",
+    "outDir": "build"
+  },
+  "include": [
+    "src/main/ts/**/*"
+  ]
+}

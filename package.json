@@ -1,0 +1,17 @@
+{
+  "name": "ewol",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Etienne Miret",
+    "email": "etienne.miret@ens-lyon.org",
+    "url": "https://etienne.miret.io/"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.x"
+  }
+}
