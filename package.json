@@ -9,6 +9,7 @@
     "url": "https://etienne.miret.io/"
   },
   "scripts": {
+    "clean": "rm -rf build",
     "build": "tsc"
   },
   "devDependencies": {
