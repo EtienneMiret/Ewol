@@ -152,7 +152,7 @@ function init () {
   });
 
   const zoom = function (e: WheelEvent): void {
-    const factor = Math.exp (e.deltaY / 1000);
+    const factor = Math.exp (-e.deltaY / 100);
     moveMatrix[0] *= factor;
     moveMatrix[1] *= factor;
     moveMatrix[2] *= factor;
