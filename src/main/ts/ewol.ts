@@ -1,3 +1,5 @@
+import { onReady } from './on-ready';
+
 const PRECISION = 20;
 
 function createFragmentShader (gl: WebGLRenderingContext): WebGLShader {
@@ -171,11 +173,4 @@ function init () {
   draw ();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener ('DOMContentLoaded', init, {
-    once: true,
-    passive: true
-  });
-} else {
-  init ();
-}
+onReady (init);
