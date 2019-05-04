@@ -1,0 +1,12 @@
+version: "2.4"
+services:
+
+  apache:
+    build: src/main/docker
+    image: ewol
+    ports:
+      - "8080:80"
+    volumes:
+      - type: bind
+        source: ./build
+        target: /usr/local/apache2/htdocs
