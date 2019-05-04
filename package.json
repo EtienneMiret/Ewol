@@ -10,7 +10,7 @@
   },
   "scripts": {
     "clean": "rm -rf build",
-    "build": "tsc"
+    "build": "tsc && cp src/main/xhtml/*.xhtml build"
   },
   "devDependencies": {
     "typescript": "3.x"
