@@ -150,6 +150,24 @@ function init () {
     once: false,
     passive: true
   });
+
+  const zoom = function (e: WheelEvent): void {
+    const factor = Math.exp (e.deltaY / 1000);
+    moveMatrix[0] *= factor;
+    moveMatrix[1] *= factor;
+    moveMatrix[2] *= factor;
+    moveMatrix[4] *= factor;
+    moveMatrix[5] *= factor;
+    moveMatrix[6] *= factor;
+    moveMatrix[8] *= factor;
+    moveMatrix[9] *= factor;
+    moveMatrix[10] *= factor;
+  };
+  document.addEventListener ('wheel', zoom, {
+    once: false,
+    passive: true
+  });
+
   draw ();
 }
 
