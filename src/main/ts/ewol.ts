@@ -5,9 +5,10 @@ import { Square } from './shape';
 
 const SPEED = 0.1;
 const ANGULAR_SPEED = Math.PI / 10;
+const MIN_DISTANCE_TO_WALLS = 0.2;
 
 let x = 0.5;
-let y = 0;
+let y = 0.5;
 let z = 0.5;
 let orientation = 0;
 
@@ -220,22 +221,25 @@ function load (map: WorldMap) {
 
   const onKeyDown = function (e: KeyboardEvent): void {
     const theta = orientation + Math.PI / 2;
+    const location = map.getTile (Math.floor (x), Math.floor (y), Math.floor (z));
+    let newX = x;
+    let newY = y;
     switch (e.code) {
       case 'KeyW':
-        x += Math.cos (theta) * SPEED;
-        y += Math.sin (theta) * SPEED;
+        newX += Math.cos (theta) * SPEED;
+        newY += Math.sin (theta) * SPEED;
         break;
       case 'KeyS':
-        x -= Math.cos (theta) * SPEED;
-        y -= Math.sin (theta) * SPEED;
+        newX -= Math.cos (theta) * SPEED;
+        newY -= Math.sin (theta) * SPEED;
         break;
       case 'KeyQ':
-        x -= Math.sin (theta) * SPEED;
-        y += Math.cos (theta) * SPEED;
+        newX -= Math.sin (theta) * SPEED;
+        newY += Math.cos (theta) * SPEED;
         break;
       case 'KeyE':
-        x += Math.sin (theta) * SPEED;
-        y -= Math.cos (theta) * SPEED;
+        newX += Math.sin (theta) * SPEED;
+        newY -= Math.cos (theta) * SPEED;
         break;
       case 'KeyA':
         orientation += ANGULAR_SPEED;
@@ -243,6 +247,23 @@ function load (map: WorldMap) {
       case 'KeyD':
         orientation -= ANGULAR_SPEED;
         break;
+    }
+    let allowed = true;
+    if (location.y + 1 - newY < MIN_DISTANCE_TO_WALLS && !location.forward) {
+      allowed = false;
+    }
+    if (newY - location.y < MIN_DISTANCE_TO_WALLS && !location.backward) {
+      allowed = false;
+    }
+    if (location.x + 1 - newX < MIN_DISTANCE_TO_WALLS && !location.right) {
+      allowed = false;
+    }
+    if (newX - location.x < MIN_DISTANCE_TO_WALLS && !location.left) {
+      allowed = false;
+    }
+    if (allowed) {
+      x = newX;
+      y = newY;
     }
   };
   document.addEventListener ('keydown', onKeyDown);

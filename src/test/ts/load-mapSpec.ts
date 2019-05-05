@@ -12,7 +12,7 @@ describe ('load-map', () => {
         });
 
         expect (map.walls.length).toBe (0);
-        expect (map.tiles.length).toBe (0);
+        expect (map['tiles'].length).toBe (0);
       });
 
       it ('should create single square map', () => {
@@ -25,10 +25,10 @@ describe ('load-map', () => {
         });
 
         expect (map.walls.length).toBe (3);
-        expect (map.tiles[0][0][0].forward).toBeTruthy ();
-        expect (map.tiles[0][0][0].backward).toBeFalsy ();
-        expect (map.tiles[0][0][0].right).toBeFalsy ();
-        expect (map.tiles[0][0][0].left).toBeFalsy ();
+        expect (map.getTile (0, 0, 0).forward).toBeTruthy ();
+        expect (map.getTile (0, 0, 0).backward).toBeFalsy ();
+        expect (map.getTile (0, 0, 0).right).toBeFalsy ();
+        expect (map.getTile (0, 0, 0).left).toBeFalsy ();
       });
 
     });

@@ -21,9 +21,9 @@ export class Tile {
   left = true;
 
   constructor (
-      private readonly x: number,
-      private readonly y: number,
-      private readonly z: number
+      readonly x: number,
+      readonly y: number,
+      readonly z: number
   ) {
   }
 
@@ -52,7 +52,7 @@ export class Tile {
 
 export class WorldMap {
   readonly walls: Wall[];
-  readonly tiles: Tile[][][];
+  private readonly tiles: Tile[][][];
 
   constructor (map: RawMap) {
     this.walls = map.walls;
@@ -98,6 +98,13 @@ export class WorldMap {
         return this.tiles[x - 1][y][z].register (wall);
       }
     });
+  }
+
+  getTile (x: number, y: number, z: number): Tile {
+    if (this.tiles[x] && this.tiles[x][y] && this.tiles[x][y][z]) {
+      return this.tiles[x][y][z];
+    }
+    return new Tile (x, y, z);
   }
 }
 
