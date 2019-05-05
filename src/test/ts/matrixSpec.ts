@@ -37,10 +37,10 @@ describe ('matrix', () => {
             translate (matrix, x, y, z);
 
             expect (matrix).toEqual ([
-              1, 0, 0, x,
-              0, 1, 0, y,
-              0, 0, 1, z,
-              0, 0, 0, 1
+              1, 0, 0, 0,
+              0, 1, 0, 0,
+              0, 0, 1, 0,
+              x, y, z, 1
             ]);
           });
 
@@ -84,8 +84,8 @@ describe ('matrix', () => {
 
         const expected = [
           1, 0, 0, 0,
-          0, Math.cos (angle), -Math.sin (angle), 0,
-          0, Math.sin (angle), Math.cos (angle), 0,
+          0, Math.cos (angle), Math.sin (angle), 0,
+          0, -Math.sin (angle), Math.cos (angle), 0,
           0, 0, 0, 1
         ];
         expect (matrix.length).toEqual (expected.length);
@@ -131,9 +131,9 @@ describe ('matrix', () => {
         rotateY (matrix, angle);
 
         const expected = [
-          Math.cos (angle), 0, Math.sin (angle), 0,
+          Math.cos (angle), 0, -Math.sin (angle), 0,
           0, 1, 0, 0,
-          -Math.sin (angle), 0, Math.cos (angle), 0,
+          Math.sin (angle), 0, Math.cos (angle), 0,
           0, 0, 0, 1
         ];
         expect (matrix.length).toEqual (expected.length);
@@ -179,8 +179,8 @@ describe ('matrix', () => {
         rotateZ (matrix, angle);
 
         const expected = [
-          Math.cos (angle), -Math.sin (angle), 0, 0,
-          Math.sin (angle), Math.cos (angle), 0, 0,
+          Math.cos (angle), Math.sin (angle), 0, 0,
+          -Math.sin (angle), Math.cos (angle), 0, 0,
           0, 0, 1, 0,
           0, 0, 0, 1
         ];
