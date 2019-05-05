@@ -229,6 +229,14 @@ function load (map: WorldMap) {
         x -= Math.cos (theta) * SPEED;
         y -= Math.sin (theta) * SPEED;
         break;
+      case 'KeyQ':
+        x -= Math.sin (theta) * SPEED;
+        y += Math.cos (theta) * SPEED;
+        break;
+      case 'KeyE':
+        x += Math.sin (theta) * SPEED;
+        y -= Math.cos (theta) * SPEED;
+        break;
       case 'KeyA':
         orientation += ANGULAR_SPEED;
         break;
