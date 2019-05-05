@@ -9,9 +9,11 @@
   },
   "scripts": {
     "clean": "rm -rf target",
+    "test": "tsc -p test-tsconfig.json && jasmine --config=jasmine.json",
     "build": "tsc && cp -pR src/main/xhtml/*.xhtml src/main/resources/* target/build"
   },
   "devDependencies": {
+    "@types/jasmine": "3.x",
     "jasmine": "3.x",
     "typescript": "3.x"
   }

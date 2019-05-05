@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "strict": true,
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "target/spec"
+  },
+  "include": [
+    "src/main/ts/**/*",
+    "src/test/ts/**/*"
+  ]
+}
