@@ -5,7 +5,7 @@
     "noImplicitReturns": true,
     "strict": true,
     "target": "es6",
-    "outDir": "build"
+    "outDir": "target/build"
   },
   "include": [
     "src/main/ts/**/*"

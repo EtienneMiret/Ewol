@@ -8,5 +8,5 @@ services:
       - "8080:80"
     volumes:
       - type: bind
-        source: ./build
+        source: ./target/build
         target: /usr/local/apache2/htdocs

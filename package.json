@@ -8,8 +8,8 @@
     "url": "https://etienne.miret.io/"
   },
   "scripts": {
-    "clean": "rm -rf build",
-    "build": "tsc && cp -pR src/main/xhtml/*.xhtml src/main/resources/* build"
+    "clean": "rm -rf target",
+    "build": "tsc && cp -pR src/main/xhtml/*.xhtml src/main/resources/* target/build"
   },
   "devDependencies": {
     "jasmine": "3.x",
