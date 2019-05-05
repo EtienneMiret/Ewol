@@ -1,4 +1,4 @@
-import { rotateX, translate } from '../../main/ts/matrix';
+import { rotateX, rotateY, translate } from '../../main/ts/matrix';
 
 describe ('matrix', () => {
 
@@ -86,6 +86,54 @@ describe ('matrix', () => {
           1, 0, 0, 0,
           0, Math.cos (angle), -Math.sin (angle), 0,
           0, Math.sin (angle), Math.cos (angle), 0,
+          0, 0, 0, 1
+        ];
+        expect (matrix.length).toEqual (expected.length);
+        for (let i = 0; i < expected.length; i++) {
+          expect (matrix[i]).toBeCloseTo (expected[i], 3);
+        }
+      });
+
+    }
+
+  });
+
+  describe ('rotateY', () => {
+
+    it ('should do nothing with a 0 angle', () => {
+      const matrix = [
+        76, 82, 18, 29,
+        51, 10, 14, 23,
+        60, 42, 58, 16,
+        43, 22, 17, 11
+      ];
+
+      rotateY (matrix, 0);
+
+      expect (matrix).toEqual ([
+        76, 82, 18, 29,
+        51, 10, 14, 23,
+        60, 42, 58, 16,
+        43, 22, 17, 11
+      ]);
+    });
+
+    for (const angle of [1, 2, -2, Math.PI / 2, -Math.PI / 2, Math.PI]) {
+
+      it (`should rotate identity on the Y axis by ${angle}`, () => {
+        const matrix = [
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1
+        ];
+
+        rotateY (matrix, angle);
+
+        const expected = [
+          Math.cos (angle), 0, Math.sin (angle), 0,
+          0, 1, 0, 0,
+          -Math.sin (angle), 0, Math.cos (angle), 0,
           0, 0, 0, 1
         ];
         expect (matrix.length).toEqual (expected.length);
