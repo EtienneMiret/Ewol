@@ -13,6 +13,7 @@
     "build": "tsc && cp -pR src/main/xhtml/*.xhtml src/main/resources/* build"
   },
   "devDependencies": {
+    "jasmine": "3.x",
     "typescript": "3.x"
   }
 }
