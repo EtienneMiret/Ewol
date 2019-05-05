@@ -1,6 +1,14 @@
 import { onReady } from './on-ready';
+import { rotateY, translate } from './matrix';
+import { Direction, loadMap, Wall, WorldMap } from './load-map';
 
-const PRECISION = 20;
+const SPEED = 0.1;
+const ANGULAR_SPEED = Math.PI / 10;
+
+let x = 0.5;
+let y = 0;
+let z = 0.5;
+let orientation = 0;
 
 function createFragmentShader (gl: WebGLRenderingContext): WebGLShader {
   const shader = gl.createShader (gl.FRAGMENT_SHADER)!;
@@ -18,74 +26,90 @@ function createVertexShader (gl: WebGLRenderingContext): WebGLShader {
   gl.shaderSource (shader, `
     attribute vec3 coordinates;
     uniform mat4 mMatrix;
+    uniform mat4 vMatrix;
+    uniform mat4 pMatrix;
     void main (void) {
-      gl_Position = mMatrix * vec4(coordinates, 1);
+      gl_Position = pMatrix * vMatrix * mMatrix * vec4(coordinates, 1);
     }
   `);
   gl.compileShader (shader);
   return shader;
 }
 
-function rotateX (matrix: Float32Array, angle: number): void {
-  const cos = Math.cos (angle);
-  const sin = Math.sin (angle);
-  const mv1 = matrix[1], mv5 = matrix[5], mv9 = matrix[9];
-
-  matrix[1] = matrix[1] * cos - matrix[2] * sin;
-  matrix[5] = matrix[5] * cos - matrix[6] * sin;
-  matrix[9] = matrix[9] * cos - matrix[10] * sin;
-
-  matrix[2] = matrix[2] * cos + mv1 * sin;
-  matrix[6] = matrix[6] * cos + mv5 * sin;
-  matrix[10] = matrix[10] * cos + mv9 * sin;
+function project (
+    angle: number,
+    ratio: number,
+    zMin: number,
+    zMax: number
+): number[] {
+  const tan = Math.tan (angle / 2);
+  return [
+    0.5 / tan, 0, 0, 0,
+    0, 0.5 * ratio / tan, 0, 0,
+    0, 0, -(zMax + zMin) / (zMax - zMin), -1,
+    0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
+  ];
 }
 
-function rotateY (matrix: Float32Array, angle: number) {
-  const cos = Math.cos (angle);
-  const sin = Math.sin (angle);
-  const mv0 = matrix[0], mv4 = matrix[4], mv8 = matrix[8];
-
-  matrix[0] = cos * matrix[0] + sin * matrix[2];
-  matrix[4] = cos * matrix[4] + sin * matrix[6];
-  matrix[8] = cos * matrix[8] + sin * matrix[10];
-
-  matrix[2] = cos * matrix[2] - sin * mv0;
-  matrix[6] = cos * matrix[6] - sin * mv4;
-  matrix[10] = cos * matrix[10] - sin * mv8;
+function view (): number[] {
+  const matrix = [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  ];
+  translate (matrix, -x, -z, y);
+  rotateY (matrix, -orientation);
+  return matrix;
 }
 
-function rotateZ (matrix: Float32Array, angle: number): void {
-  const cos = Math.cos (angle);
-  const sin = Math.sin (angle);
-  const mv0 = matrix[0], mv4 = matrix[4], mv8 = matrix[8];
-
-  matrix[0] = cos * matrix[0] - sin * matrix[1];
-  matrix[4] = cos * matrix[4] - sin * matrix[5];
-  matrix[8] = cos * matrix[8] - sin * matrix[9];
-  matrix[1] = cos * matrix[1] + sin * mv0;
-  matrix[5] = cos * matrix[5] + sin * mv4;
-  matrix[9] = cos * matrix[9] + sin * mv8;
+function model (): number[] {
+  return [
+    1, 0, 0, 0,
+    0, 0, -1, 0,
+    0, 1, 0, 0,
+    0, 0, 0, 1
+  ];
 }
 
-function init () {
+class Square {
+  private readonly coordinates: number[];
+
+  constructor (wall: Wall) {
+    this.coordinates = [];
+    this.coordinates.push (wall.x);
+    this.coordinates.push (wall.y);
+    this.coordinates.push (wall.z);
+    this.coordinates.push (wall.x);
+    this.coordinates.push (wall.y);
+    this.coordinates.push (wall.z + 1);
+    this.coordinates.push (wall.x + (wall.dir === Direction.X ? 1 : 0));
+    this.coordinates.push (wall.y + (wall.dir === Direction.Y ? 1 : 0));
+    this.coordinates.push (wall.z);
+    this.coordinates.push (wall.x + (wall.dir === Direction.X ? 1 : 0));
+    this.coordinates.push (wall.y + (wall.dir === Direction.Y ? 1 : 0));
+    this.coordinates.push (wall.z + 1);
+  }
+
+  get (index: number) {
+    return this.coordinates[index];
+  }
+}
+
+function load (map: WorldMap) {
   const canvas = <HTMLCanvasElement>document.getElementById ('canvas');
   const gl = canvas.getContext ('webgl');
   if (!gl) {
     return;
   }
 
-  const vertices = new Float32Array (6 * PRECISION);
-  for (let index = 0; index < PRECISION; index++) {
-    const n = 6 * index;
-    const angle = index * 2 * Math.PI / PRECISION;
-    const x = Math.cos (angle);
-    const y = Math.sin (angle);
-    vertices[n] = x;
-    vertices[n + 1] = y;
-    vertices[n + 2] = -1;
-    vertices[n + 3] = x;
-    vertices[n + 4] = y;
-    vertices[n + 5] = 1;
+  const vertices = new Float32Array (12 * map.walls.length);
+  for (let i = 0; i < map.walls.length; i++) {
+    const n = 12 * i;
+    const square = new Square (map.walls[i]);
+    for (let j = 0; j < 12; j++) {
+      vertices[n + j] = square.get (j);
+    }
   }
 
   const verticesBuffer = gl.createBuffer ();
@@ -93,16 +117,18 @@ function init () {
   gl.bufferData (gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.bindBuffer (gl.ARRAY_BUFFER, null);
 
-  const indices = new Uint16Array (6 * PRECISION);
-  for (let index = 0; index < PRECISION; index++) {
-    const n = 6 * index;
-    const m = 2 * index;
+  const indices = new Uint16Array (8 * map.walls.length);
+  for (let i = 0; i < map.walls.length; i++) {
+    const n = 8 * i;
+    const m = 4 * i;
     indices[n] = m;
     indices[n + 1] = m + 1;
-    indices[n + 2] = m + 1;
-    indices[n + 3] = (m + 3) % (2 * PRECISION);
-    indices[n + 4] = (m + 2 * PRECISION - 2) % (2 * PRECISION);
-    indices[n + 5] = m;
+    indices[n + 2] = m;
+    indices[n + 3] = m + 2;
+    indices[n + 4] = m + 2;
+    indices[n + 5] = m + 3;
+    indices[n + 6] = m + 1;
+    indices[n + 7] = m + 3;
   }
 
   const indicesBuffer = gl.createBuffer ();
@@ -118,14 +144,15 @@ function init () {
 
   const coordinates = gl.getAttribLocation (program, 'coordinates');
   const mMatrixLoc = gl.getUniformLocation (program, 'mMatrix');
-  const moveMatrix = new Float32Array ([
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-  ]);
+  const vMatrixLoc = gl.getUniformLocation (program, 'vMatrix');
+  const pMatrixLoc = gl.getUniformLocation (program, 'pMatrix');
+
+  const modelMatrix = model ();
+  const projectionMatrix = project (Math.PI / 2, canvas.width / canvas.height, 0.1, 100);
 
   const draw = function (): void {
+    const viewMatrix = view ();
+
     gl.bindBuffer (gl.ARRAY_BUFFER, verticesBuffer);
     gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
     gl.vertexAttribPointer (coordinates, 3, gl.FLOAT, false, 0, 0);
@@ -133,44 +160,46 @@ function init () {
 
     gl.clearColor (0, 0, 0, 1);
     gl.enable (gl.DEPTH_TEST);
+    gl.depthFunc (gl.LEQUAL);
+    gl.clearDepth(1.0);
+
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport (0, 0, canvas.width, canvas.height);
-    gl.uniformMatrix4fv (mMatrixLoc, false, moveMatrix);
+    gl.uniformMatrix4fv (mMatrixLoc, false, modelMatrix);
+    gl.uniformMatrix4fv (vMatrixLoc, false, viewMatrix);
+    gl.uniformMatrix4fv (pMatrixLoc, false, projectionMatrix);
     gl.drawElements (gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
     gl.finish ();
     gl.flush ();
+
     window.requestAnimationFrame (draw);
   };
+  draw ();
 
-  const rotate = function (e: MouseEvent): void {
-    if (e.buttons & 1) {
-      rotateX (moveMatrix, e.movementY * Math.PI / 100);
-      rotateY (moveMatrix, e.movementX * Math.PI / 100);
+  const onKeyDown = function (e: KeyboardEvent): void {
+    const theta = orientation + Math.PI / 2;
+    switch (e.code) {
+      case 'KeyW':
+        x += Math.cos (theta) * SPEED;
+        y += Math.sin (theta) * SPEED;
+        break;
+      case 'KeyS':
+        x -= Math.cos (theta) * SPEED;
+        y -= Math.sin (theta) * SPEED;
+        break;
+      case 'KeyA':
+        orientation += ANGULAR_SPEED;
+        break;
+      case 'KeyD':
+        orientation -= ANGULAR_SPEED;
+        break;
     }
   };
-  document.addEventListener ('mousemove', rotate, {
-    once: false,
-    passive: true
-  });
+  document.addEventListener ('keydown', onKeyDown);
+}
 
-  const zoom = function (e: WheelEvent): void {
-    const factor = Math.exp (-e.deltaY / 100);
-    moveMatrix[0] *= factor;
-    moveMatrix[1] *= factor;
-    moveMatrix[2] *= factor;
-    moveMatrix[4] *= factor;
-    moveMatrix[5] *= factor;
-    moveMatrix[6] *= factor;
-    moveMatrix[8] *= factor;
-    moveMatrix[9] *= factor;
-    moveMatrix[10] *= factor;
-  };
-  document.addEventListener ('wheel', zoom, {
-    once: false,
-    passive: true
-  });
-
-  draw ();
+function init (): void {
+  loadMap (load);
 }
 
 onReady (init);
