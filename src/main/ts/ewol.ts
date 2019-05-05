@@ -13,8 +13,10 @@ let orientation = 0;
 function createFragmentShader (gl: WebGLRenderingContext): WebGLShader {
   const shader = gl.createShader (gl.FRAGMENT_SHADER)!;
   gl.shaderSource (shader, `
+    precision mediump float;
+    varying vec3 vColor;
     void main (void) {
-      gl_FragColor = vec4 (1, 0, 0, 1);
+      gl_FragColor = vec4 (vColor, 1);
     }
   `);
   gl.compileShader (shader);
@@ -28,8 +30,11 @@ function createVertexShader (gl: WebGLRenderingContext): WebGLShader {
     uniform mat4 mMatrix;
     uniform mat4 vMatrix;
     uniform mat4 pMatrix;
+    uniform vec3 color;
+    varying vec3 vColor;
     void main (void) {
       gl_Position = pMatrix * vMatrix * mMatrix * vec4(coordinates, 1);
+      vColor = color;
     }
   `);
   gl.compileShader (shader);
@@ -146,6 +151,7 @@ function load (map: WorldMap) {
   const mMatrixLoc = gl.getUniformLocation (program, 'mMatrix');
   const vMatrixLoc = gl.getUniformLocation (program, 'vMatrix');
   const pMatrixLoc = gl.getUniformLocation (program, 'pMatrix');
+  const colorLoc = gl.getUniformLocation (program, 'color');
 
   const modelMatrix = model ();
   const projectionMatrix = project (Math.PI / 2, canvas.width / canvas.height, 0.1, 100);
@@ -168,6 +174,7 @@ function load (map: WorldMap) {
     gl.uniformMatrix4fv (mMatrixLoc, false, modelMatrix);
     gl.uniformMatrix4fv (vMatrixLoc, false, viewMatrix);
     gl.uniformMatrix4fv (pMatrixLoc, false, projectionMatrix);
+    gl.uniform3f (colorLoc, 1, 0, 0);
     gl.drawElements (gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
     gl.finish ();
     gl.flush ();
