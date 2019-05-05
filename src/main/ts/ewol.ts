@@ -122,23 +122,40 @@ function load (map: WorldMap) {
   gl.bufferData (gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.bindBuffer (gl.ARRAY_BUFFER, null);
 
-  const indices = new Uint16Array (8 * map.walls.length);
+  const lineIndices = new Uint16Array (8 * map.walls.length);
   for (let i = 0; i < map.walls.length; i++) {
     const n = 8 * i;
     const m = 4 * i;
-    indices[n] = m;
-    indices[n + 1] = m + 1;
-    indices[n + 2] = m;
-    indices[n + 3] = m + 2;
-    indices[n + 4] = m + 2;
-    indices[n + 5] = m + 3;
-    indices[n + 6] = m + 1;
-    indices[n + 7] = m + 3;
+    lineIndices[n] = m;
+    lineIndices[n + 1] = m + 1;
+    lineIndices[n + 2] = m;
+    lineIndices[n + 3] = m + 2;
+    lineIndices[n + 4] = m + 2;
+    lineIndices[n + 5] = m + 3;
+    lineIndices[n + 6] = m + 1;
+    lineIndices[n + 7] = m + 3;
   }
 
-  const indicesBuffer = gl.createBuffer ();
-  gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-  gl.bufferData (gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  const lineIndexBuffer = gl.createBuffer ();
+  gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, lineIndexBuffer);
+  gl.bufferData (gl.ELEMENT_ARRAY_BUFFER, lineIndices, gl.STATIC_DRAW);
+  gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, null);
+
+  const triangleIndices = new Uint16Array (6 * map.walls.length);
+  for (let i = 0; i < map.walls.length; i++) {
+    const n = 6 * i;
+    const m = 4 * i;
+    triangleIndices[n] = m;
+    triangleIndices[n + 1] = m + 1;
+    triangleIndices[n + 2] = m + 2;
+    triangleIndices[n + 3] = m + 1;
+    triangleIndices[n + 4] = m + 2;
+    triangleIndices[n + 5] = m + 3;
+  }
+
+  const triangleIndexBuffer = gl.createBuffer();
+  gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, triangleIndexBuffer);
+  gl.bufferData (gl.ELEMENT_ARRAY_BUFFER, triangleIndices, gl.STATIC_DRAW);
   gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, null);
 
   const program = gl.createProgram ()!;
@@ -160,7 +177,6 @@ function load (map: WorldMap) {
     const viewMatrix = view ();
 
     gl.bindBuffer (gl.ARRAY_BUFFER, verticesBuffer);
-    gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
     gl.vertexAttribPointer (coordinates, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray (coordinates);
 
@@ -174,8 +190,15 @@ function load (map: WorldMap) {
     gl.uniformMatrix4fv (mMatrixLoc, false, modelMatrix);
     gl.uniformMatrix4fv (vMatrixLoc, false, viewMatrix);
     gl.uniformMatrix4fv (pMatrixLoc, false, projectionMatrix);
-    gl.uniform3f (colorLoc, 1, 0, 0);
-    gl.drawElements (gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+    gl.uniform3f (colorLoc, 1, 1, 1);
+    gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, triangleIndexBuffer);
+    gl.drawElements (gl.TRIANGLES, triangleIndices.length, gl.UNSIGNED_SHORT, 0);
+
+    gl.uniform3f (colorLoc, 0, 0, 0);
+    gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, lineIndexBuffer);
+    gl.drawElements (gl.LINES, lineIndices.length, gl.UNSIGNED_SHORT, 0);
+
     gl.finish ();
     gl.flush ();
 
