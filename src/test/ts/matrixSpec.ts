@@ -1,4 +1,4 @@
-import { rotateX, rotateY, translate } from '../../main/ts/matrix';
+import { rotateX, rotateY, rotateZ, translate } from '../../main/ts/matrix';
 
 describe ('matrix', () => {
 
@@ -145,5 +145,53 @@ describe ('matrix', () => {
     }
 
   });
+
+  describe ('rotateZ', () => {
+
+    it ('should do nothing with a 0 angle', () => {
+      const matrix = [
+        80, 92, 61, 28,
+        32, 40, 51, 36,
+        28, 78, 84, 53,
+        12, 40, 58, 62
+      ];
+
+      rotateZ (matrix, 0);
+
+      expect (matrix).toEqual ([
+        80, 92, 61, 28,
+        32, 40, 51, 36,
+        28, 78, 84, 53,
+        12, 40, 58, 62
+      ]);
+    });
+
+    for (const angle of [1, 2, -2, Math.PI / 2, -Math.PI / 2, Math.PI]) {
+
+      it (`should rotate identity on the Z axis by ${angle}`, () => {
+        const matrix = [
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1
+        ];
+
+        rotateZ (matrix, angle);
+
+        const expected = [
+          Math.cos (angle), -Math.sin (angle), 0, 0,
+          Math.sin (angle), Math.cos (angle), 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1
+        ];
+        expect (matrix.length).toEqual(expected.length);
+        for (let i = 0; i < expected.length; i++) {
+          expect (matrix[i]).toBeCloseTo (expected[i], 3);
+        }
+      });
+
+    }
+
+  })
 
 });

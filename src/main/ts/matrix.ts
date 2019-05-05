@@ -44,3 +44,19 @@ export function rotateY (matrix: number[], angle: number): void {
   matrix[10] = cos * matrix[10] - sin * m2;
   matrix[11] = cos * matrix[11] - sin * m3;
 }
+
+export function rotateZ (matrix: number[], angle: number): void {
+  const cos = Math.cos (angle);
+  const sin = Math.sin (angle);
+  const m0 = matrix[0], m1 = matrix[1], m2 = matrix[2], m3 = matrix[3];
+
+  matrix[0] = cos * matrix[0] - sin * matrix[4];
+  matrix[1] = cos * matrix[1] - sin * matrix[5];
+  matrix[2] = cos * matrix[2] - sin * matrix[6];
+  matrix[3] = cos * matrix[3] - sin * matrix[7];
+
+  matrix[4] = sin * m0 + cos * matrix[4];
+  matrix[5] = sin * m1 + cos * matrix[5];
+  matrix[6] = sin * m2 + cos * matrix[6];
+  matrix[7] = sin * m3 + cos * matrix[7];
+}
