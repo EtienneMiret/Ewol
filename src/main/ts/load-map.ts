@@ -3,6 +3,11 @@ export enum Direction {
   Y = 'y'
 }
 
+export const enum Edge {
+  Walled,
+  Open
+}
+
 export interface Wall {
   x: number;
   y: number;
@@ -15,10 +20,10 @@ interface RawMap {
 }
 
 export class Tile {
-  forward = true;
-  backward = true;
-  right = true;
-  left = true;
+  forward = Edge.Open;
+  backward = Edge.Open;
+  right = Edge.Open;
+  left = Edge.Open;
 
   constructor (
       readonly x: number,
@@ -36,15 +41,23 @@ export class Tile {
         if (wall.x !== this.x) {
           return;
         }
-        this.forward = this.forward && wall.y !== this.y + 1;
-        this.backward = this.backward && wall.y !== this.y;
+        if (wall.y === this.y) {
+          this.backward = Edge.Walled;
+        }
+        if (wall.y === this.y + 1) {
+          this.forward = Edge.Walled;
+        }
         break;
       case Direction.Y:
         if (wall.y !== this.y) {
           return;
         }
-        this.right = this.right && wall.x !== this.x + 1;
-        this.left = this.left && wall.x !== this.x;
+        if (wall.x === this.x) {
+          this.left = Edge.Walled;
+        }
+        if (wall.x === this.x + 1) {
+          this.right = Edge.Walled;
+        }
         break;
     }
   }

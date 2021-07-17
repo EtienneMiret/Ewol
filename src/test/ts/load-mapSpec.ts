@@ -1,4 +1,4 @@
-import { Direction, WorldMap } from '../../main/ts/load-map';
+import { Direction, Edge, WorldMap } from '../../main/ts/load-map';
 
 describe ('load-map', () => {
 
@@ -25,10 +25,10 @@ describe ('load-map', () => {
         });
 
         expect (map.walls.length).toBe (3);
-        expect (map.getTile (0, 0, 0).forward).toBeTruthy ();
-        expect (map.getTile (0, 0, 0).backward).toBeFalsy ();
-        expect (map.getTile (0, 0, 0).right).toBeFalsy ();
-        expect (map.getTile (0, 0, 0).left).toBeFalsy ();
+        expect (map.getTile (0, 0, 0).forward).toBe (Edge.Open);
+        expect (map.getTile (0, 0, 0).backward).toBe (Edge.Walled);
+        expect (map.getTile (0, 0, 0).right).toBe (Edge.Walled);
+        expect (map.getTile (0, 0, 0).left).toBe (Edge.Walled);
       });
 
     });

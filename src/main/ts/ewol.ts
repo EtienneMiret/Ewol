@@ -1,6 +1,6 @@
 import { onReady } from './on-ready';
 import { rotateY, translate } from './matrix';
-import { loadMap, WorldMap } from './load-map';
+import { Edge, loadMap, WorldMap } from './load-map';
 import { Square } from './shape';
 
 const SPEED = 0.1;
@@ -249,16 +249,16 @@ function load (map: WorldMap) {
         break;
     }
     let allowed = true;
-    if (location.y + 1 - newY < MIN_DISTANCE_TO_WALLS && !location.forward) {
+    if (location.y + 1 - newY < MIN_DISTANCE_TO_WALLS && location.forward === Edge.Walled) {
       allowed = false;
     }
-    if (newY - location.y < MIN_DISTANCE_TO_WALLS && !location.backward) {
+    if (newY - location.y < MIN_DISTANCE_TO_WALLS && location.backward === Edge.Walled) {
       allowed = false;
     }
-    if (location.x + 1 - newX < MIN_DISTANCE_TO_WALLS && !location.right) {
+    if (location.x + 1 - newX < MIN_DISTANCE_TO_WALLS && location.right === Edge.Walled) {
       allowed = false;
     }
-    if (newX - location.x < MIN_DISTANCE_TO_WALLS && !location.left) {
+    if (newX - location.x < MIN_DISTANCE_TO_WALLS && location.left == Edge.Walled) {
       allowed = false;
     }
     if (allowed) {
