@@ -151,6 +151,30 @@ export class WorldMap {
     if (localTile.right === Edge.Walled && Math.abs (localTile.x + 1 - x) < MIN_DISTANCE_TO_WALLS) {
       return true;
     }
+    if (Math.abs (localTile.x - x) < MIN_DISTANCE_TO_WALLS && Math.abs (localTile.y - y) < MIN_DISTANCE_TO_WALLS) {
+      const leftBackTile = this.getTile (localTile.x - 1, localTile.y - 1, localTile.z);
+      if (leftBackTile.right === Edge.Walled || leftBackTile.forward === Edge.Walled) {
+        return true;
+      }
+    }
+    if (Math.abs (localTile.x - x) < MIN_DISTANCE_TO_WALLS && Math.abs (localTile.y + 1 - y) < MIN_DISTANCE_TO_WALLS) {
+      const leftFrontTile = this.getTile (localTile.x - 1, localTile.y + 1, localTile.z);
+      if (leftFrontTile.right === Edge.Walled || leftFrontTile.backward === Edge.Walled) {
+        return true;
+      }
+    }
+    if (Math.abs (localTile.x + 1 - x) < MIN_DISTANCE_TO_WALLS && Math.abs (localTile.y - y) < MIN_DISTANCE_TO_WALLS) {
+      const rightBackTile = this.getTile (localTile.x + 1, localTile.y - 1, localTile.z);
+      if (rightBackTile.left === Edge.Walled || rightBackTile.forward === Edge.Walled) {
+        return true;
+      }
+    }
+    if (Math.abs (localTile.x + 1 - x) < MIN_DISTANCE_TO_WALLS && Math.abs (localTile.y + 1 - y) < MIN_DISTANCE_TO_WALLS) {
+      const rightFrontTile = this.getTile (localTile.x + 1, localTile.y + 1, localTile.z);
+      if (rightFrontTile.left === Edge.Walled || rightFrontTile.backward === Edge.Walled) {
+        return true;
+      }
+    }
 
     return false;
   }

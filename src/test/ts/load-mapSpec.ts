@@ -39,18 +39,20 @@ describe ('load-map', () => {
 
     describe ('isCloseToWall', () => {
 
-      let map: WorldMap;
-
-      beforeEach (() => {
-        map = new WorldMap ({
-          walls: [
-            {x: 0, y: 0, z: 0, dir: Direction.X},
-            {x: 0, y: 0, z: 0, dir: Direction.Y}
-          ]
-        })
-      });
-
       describe ('(basic)', () => {
+
+        let map: WorldMap;
+
+        beforeEach (() => {
+          map = new WorldMap ({
+            walls: [
+              {x: 0, y: 0, z: 0, dir: Direction.X},
+              {x: 0, y: 0, z: 0, dir: Direction.Y},
+              {x: 0, y: 1, z: 0, dir: Direction.X},
+              {x: 1, y: 0, z: 0, dir: Direction.Y}
+            ]
+          });
+        });
 
         it ('should say no in the middle of a tile', () => {
           expect (map.isCloseToWall (0.5, 0.5, 0)).toBeFalsy ();
@@ -63,6 +65,17 @@ describe ('load-map', () => {
       });
 
       describe ('(close to edge)', () => {
+
+        let map: WorldMap;
+
+        beforeEach (() => {
+          map = new WorldMap ({
+            walls: [
+              {x: 0, y: 0, z: 0, dir: Direction.X},
+              {x: 0, y: 0, z: 0, dir: Direction.Y}
+            ]
+          })
+        });
 
         it ('should say no on an empty edge', () => {
           expect (map.isCloseToWall (1, 0.5, 0)).toBeFalsy ();
@@ -101,6 +114,38 @@ describe ('load-map', () => {
         });
 
       });
+
+      describe('(close to corner)', () => {
+
+        let map: WorldMap;
+
+        beforeEach (() => {
+          map = new WorldMap({
+            walls: [
+              {x: 0, y: 0, z: 0, dir: Direction.X},
+              {x: 0, y: 0, z: 0, dir: Direction.Y},
+              {x: 1, y: 0, z: 0, dir: Direction.Y}
+            ]
+          });
+        });
+
+        [-0.01, 0.01, 0.99, 1.01].forEach (x => {
+          [-0.01, 0.01, 0.99, 1.01].forEach (y => {
+            it (`should say yes close to a corner (${x}, ${y})`, () => {
+              expect (map.isCloseToWall (x, y, 0)).toBeTruthy ();
+            })
+          });
+        });
+
+        [1.99, 2.01].forEach (x => {
+          [1.99, 2.01].forEach (y => {
+            it (`should say no close to an empty vertex (${x}, ${y})`, () => {
+              expect (map.isCloseToWall (x, y, 0)).toBeFalsy ();
+            });
+          });
+        });
+      });
+
 
     });
 
