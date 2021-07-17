@@ -1,3 +1,19 @@
+/*
+ *         y axis
+ *           ^
+ *           | front
+ *           |
+ *           |
+ * ---------------------->   x axis
+ * left      |        right
+ *           |
+ *           |
+ *           | back
+ *
+ */
+
+const MIN_DISTANCE_TO_WALLS = 0.2;
+
 export enum Direction {
   X = 'x',
   Y = 'y'
@@ -119,6 +135,26 @@ export class WorldMap {
     }
     return new Tile (x, y, z);
   }
+
+  isCloseToWall (x: number, y: number, z: number): boolean {
+    const localTile = this.getTile (Math.floor (x), Math.floor (y), Math.floor (z));
+
+    if (localTile.backward === Edge.Walled && Math.abs (localTile.y - y) < MIN_DISTANCE_TO_WALLS) {
+      return true;
+    }
+    if (localTile.forward === Edge.Walled && Math.abs (localTile.y + 1 - y) < MIN_DISTANCE_TO_WALLS) {
+      return true;
+    }
+    if (localTile.left === Edge.Walled && Math.abs (localTile.x - x) < MIN_DISTANCE_TO_WALLS) {
+      return true;
+    }
+    if (localTile.right === Edge.Walled && Math.abs (localTile.x + 1 - x) < MIN_DISTANCE_TO_WALLS) {
+      return true;
+    }
+
+    return false;
+  }
+
 }
 
 const PASSIVE: AddEventListenerOptions = {
