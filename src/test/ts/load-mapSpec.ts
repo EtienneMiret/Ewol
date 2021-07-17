@@ -26,9 +26,13 @@ describe ('load-map', () => {
 
         expect (map.walls.length).toBe (3);
         expect (map.getTile (0, 0, 0).forward).toBe (Edge.Open);
+        expect (map.getTile (0, 1, 0).backward).toBe (Edge.Open);
         expect (map.getTile (0, 0, 0).backward).toBe (Edge.Walled);
+        expect (map.getTile (0, -1, 0).forward).toBe (Edge.Walled);
         expect (map.getTile (0, 0, 0).right).toBe (Edge.Walled);
+        expect (map.getTile (1, 0, 0).left).toBe (Edge.Walled);
         expect (map.getTile (0, 0, 0).left).toBe (Edge.Walled);
+        expect (map.getTile (-1, 0, 0).right).toBe(Edge.Walled);
       });
 
     });

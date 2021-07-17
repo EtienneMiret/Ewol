@@ -78,10 +78,10 @@ export class WorldMap {
     let maxZ = 0;
 
     this.walls.forEach (wall => {
-      minX = Math.min (minX, wall.x);
-      maxX = Math.max (maxX, wall.x + (wall.dir === Direction.X ? 1 : 0));
-      minY = Math.min (minY, wall.y);
-      maxY = Math.max (maxY, wall.y + (wall.dir === Direction.Y ? 1 : 0));
+      minX = Math.min (minX, wall.x - (wall.dir === Direction.Y ? 1 : 0));
+      maxX = Math.max (maxX, wall.x + 1);
+      minY = Math.min (minY, wall.y - (wall.dir === Direction.X ? 1 : 0));
+      maxY = Math.max (maxY, wall.y + 1);
       minZ = Math.min (minZ, wall.z);
       maxZ = Math.max (maxZ, wall.z + 1);
     });
